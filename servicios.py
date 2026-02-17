@@ -1,8 +1,11 @@
-from tabulate import tabulate
+ACTUALIZADO = "actualizado"
+SIN_CAMBIOS = "sin_cambios"
+NO_ENCONTRADO = "no_encontrado"
+
 def mostrar_inventario(inventario):
     if not inventario:
         return None
-    return tabulate(inventario, headers="keys", tablefmt="grid")
+    return inventario
 
 
 def agregar_producto(inventario, nombre, precio, cantidad):
@@ -66,12 +69,14 @@ def actualizar_producto(inventario, nombre, nuevo_precio=None, nueva_cantidad=No
     """
     producto = buscar_producto(inventario, nombre)
     if producto is not None:
+        if nuevo_precio is None and nueva_cantidad is None:
+            return SIN_CAMBIOS
         if nuevo_precio is not None:
             producto["precio"] = nuevo_precio
         if nueva_cantidad is not None:
             producto["cantidad"] = nueva_cantidad
-        return True
-    return False
+        return ACTUALIZADO
+    return NO_ENCONTRADO
 
 
 def eliminar_producto(inventario, nombre):
@@ -106,6 +111,14 @@ def calcular_estadisticas(inventario):
     - producto_mas_caro: dict con nombre y precio del producto más caro.
     - producto_mayor_stock: dict con nombre y cantidad del producto con más unidades.
     """
+    if not inventario:
+        return {
+            "unidades_totales": 0,
+            "valor_total": 0,
+            "producto_mas_caro": None,
+            "producto_mayor_stock": None,
+        }
+    
     unidades_totales = sum(producto["cantidad"] for producto in inventario)
     valor_total = sum(
         producto["precio"] * producto["cantidad"] for producto in inventario
